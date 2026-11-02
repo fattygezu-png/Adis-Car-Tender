@@ -1,0 +1,43 @@
+<div class="card shadow-sm border-0 p-3 bg-light">
+    <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-filter"></i> Filter Tenders</h5>
+    
+    <form method="GET" action="">
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Keyword</label>
+            <input type="text" name="keyword" class="form-control form-control-sm" value="{{ request.GET.keyword }}" placeholder="Search title or institution...">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Vehicle Make</label>
+            <select name="make" class="form-select form-select-sm">
+                <option value="">All Makes</option>
+                {% for m in makes %}
+                    <option value="{{ m }}" {% if request.GET.make == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Body Type</label>
+            <select name="body_type" class="form-select form-select-sm">
+                <option value="">All Body Types</option>
+                {% for b in body_types %}
+                    <option value="{{ b }}" {% if request.GET.body_type == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Location</label>
+            <select name="location" class="form-select form-select-sm">
+                <option value="">All Locations</option>
+                {% for l in locations %}
+                    <option value="{{ l }}" {% if request.GET.location == l %}selected{% endif %}>{{ l }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold mb-2">Apply Filters</button>
+        <a href="?" class="btn btn-outline-secondary btn-sm w-100">Reset Filters</a>
+    </form>
+</div>

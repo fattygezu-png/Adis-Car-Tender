@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <div class="row">
+        <!-- Institution-Only Filter Sidebar -->
+        <div class="col-md-3 mb-4">
+            {% include 'tenders/_filter_institution_sidebar.html' %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <h2 class="fw-bold mb-1">Winners Archive</h2>
+            <p class="text-muted mb-4">Select an institution to view published winning bids and official results.</p>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for institution in institutions %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 position-relative text-center p-3">
+                        
+                        <!-- Status Badge -->
+                        <div class="position-absolute top-0 start-50 translate-middle-x w-100 px-3 mt-2">
+                            {% if institution.is_dismissed %}
+                                <span class="badge bg-secondary w-100 py-2 fs-6">DISMISSED</span>
+                            {% elif institution.is_announced %}
+                                <span class="badge bg-success w-100 py-2 fs-6">ANNOUNCED</span>
+                            {% else %}
+                                <span class="badge bg-danger w-100 py-2 fs-6">NOT ANNOUNCED</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-4 pt-3">
+                            {% if institution.logo %}
+                                <img src="{{ institution.logo.url }}" class="rounded shadow-sm mb-3" style="width: 100%; height: 160px; object-fit: cover;" alt="{{ institution.name }}">
+                            {% else %}
+                                <div class="bg-dark text-white rounded d-flex align-items-center justify-content-center mb-3" style="height: 160px;">
+                                    <span class="fs-2 fw-bold">{{ institution.name|slice:":2"|upper }}</span>
+                                </div>
+                            {% endif %}
+
+                            <h4 class="fw-bold text-dark mb-1">{{ institution.name }}</h4>
+                            <p class="text-muted small mb-3">{{ institution.description|default:""|truncatechars:80 }}</p>
+
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'winners_archive_tenders' institution.pk %}" class="btn btn-outline-success fw-bold py-2 w-100">
+                                    View Results
+                                </a>
+
+                                <form action="{% url 'toggle_favorite' 'institution' institution.pk %}" method="POST" class="mb-0">
+                                    {% csrf_token %}
+                                    {% if institution.pk in fav_inst_ids %}
+                                        <button type="submit" class="btn btn-success btn-sm fw-bold w-100 py-1">
+                                            <i class="bi bi-check-circle"></i> In Watchlist
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm fw-bold w-100 py-1">
+                                            <i class="bi bi-plus-circle"></i> Add to Watchlist
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info py-4 text-center">
+                        No archived tenders found matching your filters.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

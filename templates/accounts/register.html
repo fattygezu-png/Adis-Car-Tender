@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <h2>Register for Adis Car Tender</h2>
+    <form method="POST" class="mt-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100">Register</button>
+    </form>
+    <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+</div>
+{% endblock %}

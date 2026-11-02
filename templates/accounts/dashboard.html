@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="mb-3">Welcome, {{ request.user.username }}!</h2>
+
+                    <!-- Dynamic Account Status Badge -->
+                    <div class="mb-3">
+                        <strong>Account Status:</strong> 
+                        {% if is_approved_user %}
+                            <span class="badge bg-success">Approved (Full Access Unlocked)</span>
+                        {% elif is_rejected_user %}
+                            <span class="badge bg-danger">Rejected (Please resubmit payment details)</span>
+                        {% elif is_pending_user %}
+                            <span class="badge bg-warning text-dark">Pending Approval</span>
+                        {% else %}
+                            <span class="badge bg-secondary">No Subscription Submitted</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if is_rejected_user %}
+                    <div class="alert alert-danger mb-4">
+                        <h4 class="alert-heading">❌ Subscription Rejected</h4>
+                        <p class="mb-0">Your previous subscription request was rejected by the administrator. Please select a plan, review your account name/payment details, and submit a new request below.</p>
+                    </div>
+                    {% endif %}
+
+                    {% if not is_approved_user %}
+                    <!-- Pricing Plans Grid -->
+                    <h4 class="mt-4 mb-3">Choose Your Subscription Plan</h4>
+                    <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
+                        <div class="col">
+                            <div class="card h-100 border-primary text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Monthly</h5>
+                                    <h3 class="my-2 fw-bold">400 ETB</h3>
+                                    <p class="text-muted small mb-0">1 Month Access</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100 border-success text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Quarterly</h5>
+                                    <h3 class="my-2 fw-bold">1,000 ETB</h3>
+                                    <p class="text-muted small mb-0">3 Months Access</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card h-100 border-info text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">Semi-Annual</h5>
+                                    <h3 class="my-2 fw-bold">1,800 ETB</h3>
+                                    <p class="text-muted small mb-0">6 Months Access</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Instruction Box -->
+                    <div class="alert alert-info mb-4">
+                        <h4 class="alert-heading">💳 Subscription Payment Instructions</h4>
+                        <p class="mb-2">To get your account approved, transfer the fee for your chosen plan to one of our official accounts below:</p>
+                        <ul class="mb-0 ps-3">
+                            <li><strong>Commercial Bank of Ethiopia (CBE):</strong> <code>1000572034556</code> (Name: feyo gezu)</li>
+                            <li><strong>Telebirr:</strong> <code>0930771571</code> (Name: feyo gezu)</li>
+                            <li><strong>Awash Bank:</strong> <code>01339367484</code> (Name: feyo gezu)</li>
+                        </ul>
+                        <hr>
+                        <p class="mb-0 small text-muted">After making the payment, select your plan, chosen bank, and enter your account sender name below.</p>
+                    </div>
+                    {% endif %}
+
+                    <h4 class="mt-4">Your Subscription Status History</h4>
+                    {% if subscriptions %}
+                        <ul class="list-group mb-4">
+                            {% for sub in subscriptions %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Plan:</strong> {{ sub.get_plan_display }} |
+                                        <strong>Method:</strong> {{ sub.get_payment_method_display }} | 
+                                        <strong>Sender:</strong> {{ sub.sender_name }}
+                                    </div>
+                                    <span class="badge bg-{% if sub.status == 'APPROVED' %}success{% elif sub.status == 'REJECTED' %}danger{% else %}warning text-dark{% endif %}">
+                                        {{ sub.status }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No subscription requests submitted yet.</p>
+                    {% endif %}
+
+                    {% if not is_approved_user %}
+                    <hr>
+                    <h4 class="mt-4">Submit Subscription Details</h4>
+                    <form method="POST" class="mt-3">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary w-100">Submit Details for Approval</button>
+                    </form>
+                    {% endif %}
+
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'logout' %}" class="text-danger text-decoration-none">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
