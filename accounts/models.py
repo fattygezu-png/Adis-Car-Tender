@@ -17,9 +17,9 @@ class CustomerSubscription(models.Model):
     ]
 
     PLAN_CHOICES = [
-        ('MONTHLY', 'Monthly Plan — 400 ETB'),
-        ('QUARTERLY', 'Quarterly Plan — 1,000 ETB'),
-        ('SEMI_ANNUAL', 'Semi-Annual Plan — 1,800 ETB'),
+        ('Monthly (500 ETB)', 'Monthly Plan — 500 ETB'),
+        ('Quarterly (1300 ETB)', 'Quarterly Plan — 1300 ETB'),
+        ('Semiannually (2400 ETB)', 'Semi-Annually Plan — 2400 ETB'),
     ]
 
     user = models.ForeignKey(
@@ -29,13 +29,13 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
     )
-    plan = models.CharField(
-        max_length=20, choices=PLAN_CHOICES, default='MONTHLY'
+    plan_name = models.CharField(
+        max_length=100, choices=PLAN_CHOICES, default='Monthly (500 ETB)'
     )
     sender_name = models.CharField(max_length=100)
     reference_number = models.CharField(max_length=100, blank=True, null=True)
     payment_method = models.CharField(
-        max_length=20, choices=PAYMENT_CHOICES, default='CBE'
+        max_length=50, choices=PAYMENT_CHOICES, default='TELEBIRR'
     )
     status = models.CharField(max_length=20, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,4 +44,4 @@ class CustomerSubscription(models.Model):
         return self.status == 'APPROVED'
 
     def __str__(self):
-        return f'{self.sender_name} ({self.user}) - {self.get_plan_display()} via {self.payment_method} [{self.status}]'
+        return f'{self.sender_name} ({self.user}) - {self.plan_name} via {self.payment_method} [{self.status}]'

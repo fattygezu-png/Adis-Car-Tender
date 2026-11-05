@@ -16,6 +16,10 @@ def has_approved_subscription(user):
     """Checks whether the logged-in user has an approved active subscription."""
     if not user.is_authenticated:
         return False
+    
+    if user.is_staff or user.is_superuser:
+        return True
+
     return CustomerSubscription.objects.filter(
         Q(user=user) | Q(sender_name__iexact=user.username.strip()),
         status__iexact='APPROVED',
@@ -50,22 +54,26 @@ def get_dynamic_filter_options(vehicle_queryset):
 
 @login_required
 def vehicle_tender_list_view(request):
-    """Active Tenders Page: Shows institutions filtered strictly by keyword."""
+    """Active Tenders Page: Automatically displays all institutions whose deadline hasn't passed."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 
     now = timezone.now()
+    
+    # Automatically include all institutions with a future deadline OR no set deadline
     institutions = Institution.objects.filter(
         Q(deadline__isnull=True) | Q(deadline__gt=now)
     )
 
-    keyword = request.GET.get('keyword', '').strip()
+    keyword = request.GET.get('q', '').strip() or request.GET.get('keyword', '').strip()
     if keyword:
         institutions = institutions.filter(
-            Q(name__icontains=keyword) | Q(description__icontains=keyword)
+            Q(name__icontains=keyword) 
+            | Q(description__icontains=keyword) 
+            | Q(vehicletender__title__icontains=keyword)
         ).distinct()
 
     fav_inst_ids = FavoriteInstitution.objects.filter(
@@ -81,22 +89,23 @@ def vehicle_tender_list_view(request):
         },
     )
 
-
 @login_required
 def winners_archive_institutions_view(request):
-    """Winners Archive Page: Shows archived institutions filtered strictly by keyword."""
+    """Winners Archive Page: Shows institutions whose deadline passed OR are manually marked as announced."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 
     now = timezone.now()
+    
+    # Include institutions if their deadline passed OR if manually marked as announced
     institutions = Institution.objects.filter(
-        deadline__isnull=False, deadline__lte=now
-    )
+        Q(deadline__isnull=False, deadline__lte=now) | Q(is_announced=True)
+    ).distinct()
 
-    keyword = request.GET.get('keyword', '').strip()
+    keyword = request.GET.get('q', '').strip() or request.GET.get('keyword', '').strip()
     if keyword:
         institutions = institutions.filter(
             Q(name__icontains=keyword) | Q(description__icontains=keyword)
@@ -114,14 +123,12 @@ def winners_archive_institutions_view(request):
             'fav_inst_ids': set(fav_inst_ids),
         },
     )
-
-
 @login_required
 def watchlist_view(request):
-    """Watchlist Page: Displays saved institutions and vehicle tenders with full sidebar filtering."""
+    """Watchlist Page: Displays saved institutions and vehicle tenders with full filtering."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 
@@ -133,7 +140,7 @@ def watchlist_view(request):
         favorited_by__user=request.user
     ).select_related('institution')
 
-    keyword = request.GET.get('keyword', '').strip()
+    keyword = request.GET.get('q', '').strip() or request.GET.get('keyword', '').strip()
     make = request.GET.get('make', '').strip()
     body_type = request.GET.get('body_type', '').strip()
     location = request.GET.get('location', '').strip()
@@ -186,13 +193,12 @@ def watchlist_view(request):
         },
     )
 
-
 @login_required
 def toggle_favorite_view(request, target_type, pk):
     """Form-based POST action to toggle institutions or vehicle tenders in user watchlists."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 
@@ -231,7 +237,7 @@ def institution_tenders_view(request, institution_pk):
     """Active Vehicle Tenders view for a single institution with vehicle-specific filtering."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 
@@ -285,7 +291,7 @@ def winners_archive_tenders_view(request, institution_pk):
     """Archived Vehicle Tender Results for a single institution with vehicle-specific filtering."""
     if not has_approved_subscription(request.user):
         messages.warning(
-            request, 'Access restricted! Subscription approval required.'
+            request, 'Access restricted! Active subscription approval required.'
         )
         return redirect('user_dashboard')
 

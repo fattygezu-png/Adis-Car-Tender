@@ -1,115 +1,157 @@
 {% extends 'base.html' %}
 
+{% block title %}Tenders - Adis Car Tender{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4 mb-5">
-    <div class="row">
-        <!-- Filter Sidebar -->
-        <div class="col-md-3 mb-4">
-            {% include 'tenders/_filter_institution_sidebar.html' %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Page Header & Filter Section -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
+        <div>
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Active Tenders</h1>
+            <p class="text-sm text-gray-500 mt-1">Select an institution to view available vehicle tenders and submit bids.</p>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <h2 class="fw-bold mb-1">Active Tenders</h2>
-            <p class="text-muted mb-4">Select an institution to view available vehicle tenders and submit bids.</p>
+        <!-- Filter Form -->
+        <form method="GET" class="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-gray-100">
+            <div class="w-full sm:flex-1 space-y-1">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Filter Institutions</label>
+                <div class="relative">
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search institution name..."
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                </div>
+            </div>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto mt-auto pt-1 sm:pt-0">
+                <button type="submit" class="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">
+                    Apply Filter
+                </button>
+                <a href="{% url 'tender_list' %}" class="flex-1 sm:flex-none px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-all text-center">
+                    Reset Filter
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tenders Listing Area -->
+    <div class="space-y-4">
+        {% if institutions %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for institution in institutions %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 position-relative text-center p-3">
-                        
-                        <!-- Deadline Status / Countdown Badge -->
-                        <div class="position-absolute top-0 start-50 translate-middle-x w-100 px-3 mt-2">
-                            {% if institution.deadline %}
-                                <span class="badge bg-danger w-100 py-2 fs-6 countdown-badge" data-deadline="{{ institution.deadline|date:'c' }}">
-                                    Loading Countdown...
-                                </span>
-                            {% else %}
-                                <span class="badge bg-success w-100 py-2 fs-6">OPEN TENDER</span>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div class="space-y-4">
+                            <!-- Logo & Name Header -->
+                            <div class="flex items-center gap-4">
+                                {% if institution.logo %}
+                                    <img src="{{ institution.logo.url }}" alt="{{ institution.name }}" class="w-12 h-12 rounded-2xl object-cover border border-gray-100 shadow-sm">
+                                {% else %}
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg border border-emerald-100">
+                                        {{ institution.name|slice:":2"|upper }}
+                                    </div>
+                                {% endif %}
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-lg font-bold text-gray-900 truncate">{{ institution.name }}</h3>
+                                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200 inline-block mt-0.5">Active</span>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-gray-600 line-clamp-2">{{ institution.description|default:"Browse vehicles available for bidding under this institution." }}</p>
+
+                            <!-- Rule / Document PDF Link (Using correct rules_pdf field) -->
+                            {% if institution.rules_pdf %}
+                                <div class="pt-1">
+                                    <a href="{{ institution.rules_pdf.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        View Tender Rules PDF
+                                    </a>
+                                </div>
                             {% endif %}
                         </div>
 
-                        <div class="mt-4 pt-3">
-                            {% if institution.logo %}
-                                <img src="{{ institution.logo.url }}" class="rounded shadow-sm mb-3" style="width: 100%; height: 160px; object-fit: cover;" alt="{{ institution.name }}">
-                            {% else %}
-                                <div class="bg-dark text-white rounded d-flex align-items-center justify-content-center mb-3" style="height: 160px;">
-                                    <span class="fs-2 fw-bold">{{ institution.name|slice:":2"|upper }}</span>
-                                </div>
-                            {% endif %}
+                        <!-- Footer Actions: Deadline, View Tenders & Watchlist -->
+                        <div class="mt-6 pt-4 border-t border-gray-100 space-y-3">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-gray-400">Deadline:</span>
+                                {% if institution.deadline %}
+                                    <span class="font-semibold text-gray-700 deadline-badge" data-deadline="{{ institution.deadline|date:'c' }}">
+                                        {{ institution.deadline }}
+                                    </span>
+                                {% else %}
+                                    <span class="font-semibold text-emerald-600">Open / No Deadline</span>
+                                {% endif %}
+                            </div>
 
-                            <h4 class="fw-bold text-dark mb-1">{{ institution.name }}</h4>
-                            <p class="text-muted small mb-3">{{ institution.description|default:""|truncatechars:80 }}</p>
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                {% if institution.pk %}
+                                    <a href="{% url 'institution_tenders' institution.pk %}" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs transition-all text-center shadow-sm">
+                                        View Tenders &rarr;
+                                    </a>
 
-                            <div class="d-flex flex-column gap-2">
-                                <a href="{% url 'institution_tenders' institution.pk %}" class="btn btn-outline-primary fw-bold py-2 w-100">
-                                    View Tenders
-                                </a>
-
-                                <form action="{% url 'toggle_favorite' 'institution' institution.pk %}" method="POST" class="mb-0">
-                                    {% csrf_token %}
-                                    {% if institution.pk in fav_inst_ids %}
-                                        <button type="submit" class="btn btn-success btn-sm fw-bold w-100 py-1">
-                                            <i class="bi bi-check-circle"></i> In Watchlist
+                                    <form action="{% url 'toggle_favorite' 'institution' institution.pk %}" method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-full px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl text-xs border border-gray-200 transition-all text-center">
+                                            {% if institution.pk in fav_inst_ids %}
+                                                Remove Watchlist
+                                            {% else %}
+                                                Add to Watchlist
+                                            {% endif %}
                                         </button>
-                                    {% else %}
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm fw-bold w-100 py-1">
-                                            <i class="bi bi-plus-circle"></i> Add to Watchlist
-                                        </button>
-                                    {% endif %}
-                                </form>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info py-4 text-center">
-                        No active tenders found matching your search.
-                    </div>
-                </div>
                 {% endfor %}
             </div>
-        </div>
+        {% else %}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center space-y-3">
+                <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900">No active tenders found</h3>
+                <p class="text-sm text-gray-500">No active tenders found matching your search query.</p>
+            </div>
+        {% endif %}
     </div>
+
 </div>
 
-<!-- Countdown Timer Script -->
+<!-- Live Countdown Script (Fixed math operators) -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const countdownElements = document.querySelectorAll(".countdown-badge");
+        const badges = document.querySelectorAll(".deadline-badge");
+        badges.forEach(badge => {
+            const deadlineStr = badge.getAttribute("data-deadline");
+            if (!deadlineStr) return;
+            const deadlineTime = new Date(deadlineStr).getTime();
 
-        function updateCountdowns() {
-            const now = new Date().getTime();
-
-            countdownElements.forEach(function (el) {
-                const deadlineString = el.getAttribute("data-deadline");
-                if (!deadlineString) return;
-
-                const deadlineTime = new Date(deadlineString).getTime();
+            function updateCountdown() {
+                const now = new Date().getTime();
                 const distance = deadlineTime - now;
 
                 if (distance < 0) {
-                    el.innerHTML = "DEADLINE PASSED";
-                    el.classList.remove("bg-danger");
-                    el.classList.add("bg-secondary");
-                } else {
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const secs = Math.floor((distance % (1000 * 60)) / 1000);
-
-                    if (days > 0) {
-                        el.innerHTML = `⏳ ${days}d ${hours}h ${mins}m left`;
-                    } else {
-                        el.innerHTML = `⏳ ${hours}h ${mins}m ${secs}s left`;
-                    }
+                    badge.innerHTML = "<span class='text-red-500 font-bold'>Expired</span>";
+                    return;
                 }
-            });
-        }
 
-        updateCountdowns();
-        setInterval(updateCountdowns, 1000);
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                let countdownText = "";
+                if (days > 0) countdownText += `${days}d `;
+                countdownText += `${hours}h ${minutes}m ${seconds}s left`;
+                badge.textContent = countdownText;
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
     });
 </script>
 {% endblock %}

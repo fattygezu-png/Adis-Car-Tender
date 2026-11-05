@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Q
 from django.shortcuts import redirect, render
 from .forms import CustomerRegistrationForm, ManualSubscriptionForm
 from .models import CustomerSubscription
@@ -30,7 +29,12 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, f'Welcome back, {user.username}!')
-            return redirect('user_dashboard')
+            
+            # Check if user is staff or superuser, and redirect accordingly
+            if user.is_staff or user.is_superuser:
+                return redirect('/admin/')
+            else:
+                return redirect('user_dashboard')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -45,16 +49,14 @@ def logout_view(request):
 
 @login_required
 def user_dashboard(request):
-    user_subscriptions = CustomerSubscription.objects.filter(
-        Q(user=request.user)
-        | Q(sender_name__iexact=request.user.username.strip())
-    )
+    # Filter strictly by foreign key (user=request.user) to isolate records
+    user_subscriptions = CustomerSubscription.objects.filter(user=request.user)
 
     if request.method == 'POST':
-        form = ManualSubscriptionForm(request.POST)
+        form = ManualSubscriptionForm(request.POST, request.FILES)
         if form.is_valid():
             sub = form.save(commit=False)
-            sub.user = request.user
+            sub.user = request.user  # Forcefully assign the authenticated User instance
             if not sub.sender_name:
                 sub.sender_name = request.user.username
             sub.save()

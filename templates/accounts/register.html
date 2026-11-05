@@ -1,13 +1,88 @@
 {% extends 'base.html' %}
 
+{% block title %}Register - Adis Car Tender{% endblock %}
+
 {% block content %}
-<div class="container mt-5" style="max-width: 500px;">
-    <h2>Register for Adis Car Tender</h2>
-    <form method="POST" class="mt-3">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary w-100">Register</button>
-    </form>
-    <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+<div class="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 space-y-6">
+        
+        <!-- Heading -->
+        <div class="text-center space-y-1">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Create an Account
+            </h1>
+            <p class="text-sm text-gray-500">
+                Register for Adis Car Tender to get started
+            </p>
+        </div>
+
+        <!-- Registration Form -->
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Username Field -->
+            <div class="space-y-1">
+                <label class="block text-sm font-semibold text-gray-700">{{ form.username.label }}</label>
+                <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-3 [&>input]:rounded-xl [&>input]:border [&>input]:border-gray-200 [&>input]:bg-gray-50 [&>input]:focus:bg-white [&>input]:focus:ring-2 [&>input]:focus:ring-emerald-500 [&>input]:focus:border-transparent [&>input]:outline-none [&>input]:text-sm [&>input]:text-gray-900 [&>input]:transition-all">
+                    {{ form.username }}
+                </div>
+                {% if form.username.help_text %}
+                    <p class="text-xs text-gray-400 mt-1 leading-relaxed">{{ form.username.help_text|safe }}</p>
+                {% endif %}
+                {% if form.username.errors %}
+                    <p class="text-xs text-red-600 font-medium mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Phone Number Field -->
+            <div class="space-y-1">
+                <label class="block text-sm font-semibold text-gray-700">{{ form.phone_number.label }}</label>
+                <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-3 [&>input]:rounded-xl [&>input]:border [&>input]:border-gray-200 [&>input]:bg-gray-50 [&>input]:focus:bg-white [&>input]:focus:ring-2 [&>input]:focus:ring-emerald-500 [&>input]:focus:border-transparent [&>input]:outline-none [&>input]:text-sm [&>input]:text-gray-900 [&>input]:transition-all">
+                    {{ form.phone_number }}
+                </div>
+                {% if form.phone_number.errors %}
+                    <p class="text-xs text-red-600 font-medium mt-1">{{ form.phone_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password Fields Loop (Remaining Fields) -->
+            {% for field in form %}
+                {% if field.name not in 'username,phone_number' %}
+                    <div class="space-y-1">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            {{ field.label }}
+                        </label>
+                        <div class="[&>input]:w-full [&>input]:px-4 [&>input]:py-3 [&>input]:rounded-xl [&>input]:border [&>input]:border-gray-200 [&>input]:bg-gray-50 [&>input]:focus:bg-white [&>input]:focus:ring-2 [&>input]:focus:ring-emerald-500 [&>input]:focus:border-transparent [&>input]:outline-none [&>input]:text-sm [&>input]:text-gray-900 [&>input]:transition-all">
+                            {{ field }}
+                        </div>
+                        {% if field.help_text %}
+                            <p class="text-xs text-gray-400 mt-1 leading-relaxed">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                            <p class="text-xs text-red-600 font-medium mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-base mt-4">
+                Register
+            </button>
+        </form>
+
+        <!-- Footer Link -->
+        <div class="text-center text-sm text-gray-500 pt-4 border-t border-gray-100">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="font-semibold text-emerald-600 hover:underline">
+                Login here
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,120 +1,167 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ institution.name }} - Vehicle Tender Results{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4 mb-5">
-    <!-- Header banner -->
-    <div class="bg-light p-4 rounded mb-4 shadow-sm">
-        <div class="d-flex align-items-center gap-3">
-            {% if institution.logo %}
-                <img src="{{ institution.logo.url }}" class="rounded-circle shadow-sm" style="width: 80px; height: 80px; object-fit: cover;" alt="{{ institution.name }}">
-            {% else %}
-                <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                    <span class="fs-3 fw-bold">{{ institution.name|slice:":2"|upper }}</span>
-                </div>
-            {% endif %}
-            <div>
-                <h2 class="fw-bold mb-1 text-dark">{{ institution.name }}</h2>
-                <p class="text-muted mb-2">{{ institution.description }}</p>
-                <div>
-                    {% if institution.is_dismissed %}
-                        <span class="badge bg-secondary py-2 px-3 fs-6">DISMISSED</span>
-                    {% elif institution.is_announced %}
-                        <span class="badge bg-success py-2 px-3 fs-6">RESULTS ANNOUNCED</span>
-                    {% else %}
-                        <span class="badge bg-danger py-2 px-3 fs-6">NOT ANNOUNCED</span>
-                    {% endif %}
-                    {% if institution.deadline %}
-                        <span class="badge bg-outline-dark text-dark border ms-2 py-2 px-3 fs-6">
-                            Deadline Passed: {{ institution.deadline|date:"M d, Y - H:i" }}
-                        </span>
-                    {% endif %}
-                </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Institution Banner / Info Card -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+        {% if institution.logo %}
+            <div class="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                <img src="{{ institution.logo.url }}" alt="{{ institution.name }}" class="w-full h-full object-cover">
             </div>
+        {% endif %}
+        
+        <div class="space-y-2 flex-1">
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">{{ institution.name }}</h1>
+                {% if institution.is_announced %}
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 uppercase tracking-wider">
+                        ANNOUNCED
+                    </span>
+                {% elif institution.is_dismissed %}
+                    <span class="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-200 uppercase tracking-wider">
+                        DISMISSED
+                    </span>
+                {% else %}
+                    <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-200 uppercase tracking-wider">
+                        NOT ANNOUNCED
+                    </span>
+                {% endif %}
+            </div>
+            <p class="text-sm text-gray-600 leading-relaxed">{{ institution.description|default:"Browse vehicle tenders and details for this institution." }}</p>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Vehicle-Only Filter Sidebar -->
-        <div class="col-md-3 mb-4">
-            {% include 'tenders/_filter_vehicle_sidebar.html' %}
+    <!-- Filter Section Card -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
+        <div class="border-b border-gray-100 pb-3">
+            <h2 class="text-base font-bold text-gray-900">Filter Vehicles</h2>
         </div>
 
-        <!-- Vehicles Grid -->
-        <div class="col-md-9">
-            <h3 class="fw-bold mb-4 text-dark">Vehicle Tender Results</h3>
-            
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <!-- Vehicle Make -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Make</label>
+                <select name="make" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Makes</option>
+                    {% for m in makes %}
+                        <option value="{{ m }}" {% if request.GET.make == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Body Type -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Body Type</label>
+                <select name="body_type" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Body Types</option>
+                    {% for b in body_types %}
+                        <option value="{{ b }}" {% if request.GET.body_type == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Location -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Location</label>
+                <select name="location" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Locations</option>
+                    {% for loc in locations %}
+                        <option value="{{ loc }}" {% if request.GET.location == loc %}selected{% endif %}>{{ loc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="sm:col-span-3 flex items-center gap-3 pt-2">
+                <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">
+                    Apply Filters
+                </button>
+                <a href="." class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-all text-center">
+                    Reset Filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vehicle Tender Results Grid -->
+    <div class="space-y-6">
+        <h2 class="text-xl font-bold text-gray-900 tracking-tight">Vehicle Tender Results</h2>
+
+        {% if tenders %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for tender in tenders %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 position-relative">
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+                        
+                        <!-- Safe Tender Image Check -->
                         {% if tender.image %}
-                            <img src="{{ tender.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ tender.title }}">
-                        {% else %}
-                            <div class="bg-secondary text-white card-img-top d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <i class="bi bi-car-front fs-1"></i>
+                            <div class="h-48 w-full bg-gray-100 overflow-hidden">
+                                <img src="{{ tender.image.url }}" alt="{{ tender.title }}" class="w-full h-full object-cover">
                             </div>
                         {% endif %}
 
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-secondary">Year: {{ tender.year|default:"N/A" }}</span>
-                                <small class="text-muted fw-bold">{{ tender.location|default:"" }}</small>
+                        <div class="p-6 space-y-3 flex-1">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-gray-900">{{ tender.title }}</h3>
+                                {% if tender.is_announced %}
+                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-md">Announced</span>
+                                {% elif tender.is_dismissed %}
+                                    <span class="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-semibold rounded-md">Dismissed</span>
+                                {% endif %}
                             </div>
-                            <h5 class="fw-bold text-dark">{{ tender.title }}</h5>
-                            <p class="text-muted small mb-2">
-                                Make: <strong>{{ tender.make }}</strong> | Body: <strong>{{ tender.body_type }}</strong>
-                            </p>
-
-                            <div class="p-3 bg-light rounded text-center my-3">
-                                <small class="text-muted d-block">Starting Price:</small>
-                                <span class="fs-4 fw-bold text-dark">{{ tender.starting_price }} ETB</span>
+                            
+                            <div class="grid grid-cols-2 gap-2 pt-2 text-xs text-gray-600 border-t border-gray-100">
+                                <div><span class="font-semibold text-gray-900">Make:</span> {{ tender.make|default:"N/A" }}</div>
+                                <div><span class="font-semibold text-gray-900">Body:</span> {{ tender.body_type|default:"N/A" }}</div>
+                                <div><span class="font-semibold text-gray-900">Location:</span> {{ tender.location|default:"N/A" }}</div>
+                                <div><span class="font-semibold text-gray-900">Year:</span> {{ tender.model_year|default:"N/A" }}</div>
                             </div>
 
-                            {% if tender.winner_name %}
-                                <div class="alert alert-success text-center mb-0 p-2">
-                                    <small class="fw-bold d-block text-success">Winner: {{ tender.winner_name }}</small>
-                                    <strong class="d-block">Winning Price: {{ tender.winning_price }} ETB</strong>
-                                </div>
-                            {% elif institution.is_dismissed %}
-                                <div class="alert alert-secondary text-center mb-0 p-2">
-                                    <small class="fw-bold">TENDER DISMISSED</small>
-                                </div>
-                            {% else %}
-                                <div class="alert alert-warning text-center mb-0 p-2">
-                                    <small class="fw-bold text-dark">NOT ANNOUNCED</small>
+                            <!-- Announced Winner Details Box -->
+                            {% if tender.is_announced %}
+                                <div class="mt-3 p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1 text-xs">
+                                    <div class="font-bold text-emerald-900">Winning Bid Details:</div>
+                                    <div class="text-emerald-700"><span class="font-semibold">Winner:</span> {{ tender.winner_name|default:"Declared" }}</div>
+                                    <div class="text-emerald-700"><span class="font-semibold">Winning Price:</span> ETB {{ tender.winning_price|default:"0.00" }}</div>
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="card-footer bg-white border-0 pt-0 pb-3">
-                            <form action="{% url 'toggle_favorite' 'vehicle' tender.pk %}" method="POST" class="mb-0">
-                                {% csrf_token %}
-                                {% if tender.pk in fav_vehicle_ids %}
-                                    <button type="submit" class="btn btn-success btn-sm fw-bold w-100 py-2">
-                                        <i class="bi bi-check-circle"></i> In Watchlist
+                        <!-- Card Footer Actions -->
+                        <div class="p-6 pt-0 space-y-2">
+                            {% if tender.id in fav_vehicle_ids %}
+                                <form action="{% url 'toggle_favorite' 'vehicle' tender.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold rounded-xl text-xs text-center transition-all border border-amber-200">
+                                        ★ Remove from Watchlist
                                     </button>
-                                {% else %}
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm fw-bold w-100 py-2">
-                                        <i class="bi bi-plus-circle"></i> Add to Watchlist
+                                </form>
+                            {% else %}
+                                <form action="{% url 'toggle_favorite' 'vehicle' tender.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl text-xs text-center transition-all border border-gray-200">
+                                        Add to Watchlist
                                     </button>
-                                {% endif %}
-                            </form>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info py-4 text-center">
-                        No vehicle tenders found for this institution matching your filters.
-                    </div>
-                </div>
                 {% endfor %}
             </div>
-
-            <div class="mt-4">
-                <a href="{% url 'winners_archive' %}" class="btn btn-outline-secondary">&larr; Back to Winners Archive</a>
+        {% else %}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center space-y-3">
+                <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900">No Vehicle Tenders Found</h3>
+                <p class="text-sm text-gray-500">No vehicle tenders match your selected filter criteria for this institution.</p>
             </div>
-        </div>
+        {% endif %}
     </div>
+
 </div>
 {% endblock %}

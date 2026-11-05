@@ -1,119 +1,140 @@
 {% extends 'base.html' %}
 
+{% block title %}My Watchlist - Adis Car Tender{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4 mb-5">
-    <div class="row">
-        <!-- Reusable Filter Sidebar -->
-        <div class="col-md-3 mb-4">
-            {% include 'tenders/_filter_sidebar.html' %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Page Header -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">My Watchlist</h1>
+        <p class="text-sm text-gray-500 mt-1">Saved institutions and vehicle tenders for quick access.</p>
+    </div>
+
+    <!-- Filter Section Card -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
+        <div class="border-b border-gray-100 pb-3">
+            <h2 class="text-base font-bold text-gray-900">Filter Tenders</h2>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <h2 class="fw-bold mb-1"><i class="bi bi-heart-fill text-danger"></i> My Watchlist</h2>
-            <p class="text-muted mb-4">Saved institutions and vehicle tenders for quick access.</p>
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <!-- Keyword Search -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Keyword</label>
+                <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search title or institution..."
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+            </div>
 
-            <!-- Favorited Institutions -->
-            <h4 class="fw-bold mb-3">Favorited Institutions</h4>
-            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
-                {% for institution in fav_institutions %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body d-flex flex-column justify-content-between">
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    {% if institution.logo %}
-                                        <img src="{{ institution.logo.url }}" class="rounded-circle shadow-sm me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 60px; height: 60px;">
-                                            <span class="fs-4 fw-bold">{{ institution.name|slice:":2"|upper }}</span>
-                                        </div>
-                                    {% endif %}
-                                    <div>
-                                        <h4 class="fw-bold text-dark mb-0">{{ institution.name }}</h4>
-                                        {% if institution.deadline %}
-                                            {% if institution.deadline <= now %}
-                                                <span class="badge bg-secondary">Archived (Deadline Passed)</span>
-                                            {% else %}
-                                                <small class="text-warning fw-bold"><i class="bi bi-clock"></i> Deadline: {{ institution.deadline|date:"M d, Y - H:i" }}</small>
-                                            {% endif %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex flex-column gap-2">
-                                {% if institution.deadline and institution.deadline <= now %}
-                                    <a href="{% url 'winners_archive_tenders' institution.pk %}" class="btn btn-outline-dark btn-sm fw-bold w-100 py-2">View Results Archive</a>
-                                {% else %}
-                                    <a href="{% url 'institution_tenders' institution.pk %}" class="btn btn-dark btn-sm fw-bold w-100 py-2">View Active Tenders</a>
-                                {% endif %}
+            <!-- Vehicle Make -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Make</label>
+                <select name="make" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Makes</option>
+                    {% for m in makes %}
+                        <option value="{{ m }}" {% if request.GET.make == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-                                <form action="{% url 'toggle_favorite' 'institution' institution.pk %}" method="POST" class="mb-0">
+            <!-- Body Type -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Body Type</label>
+                <select name="body_type" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Body Types</option>
+                    {% for b in body_types %}
+                        <option value="{{ b }}" {% if request.GET.body_type == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Location -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Location</label>
+                <select name="location" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm text-gray-900 transition-all">
+                    <option value="">All Locations</option>
+                    {% for loc in locations %}
+                        <option value="{{ loc }}" {% if request.GET.location == loc %}selected{% endif %}>{{ loc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="sm:col-span-2 lg:col-span-4 flex items-center gap-3 pt-2">
+                <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-sm transition-all">
+                    Apply Filters
+                </button>
+                <a href="{% url 'watchlist' %}" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition-all">
+                    Reset Filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Favorited Institutions Section -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-4">
+        <h2 class="text-lg font-bold text-gray-900 tracking-tight">Favorited Institutions</h2>
+        
+        {% if fav_institutions %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for inst in fav_institutions %}
+                    <div class="p-4 rounded-2xl border border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            {% if inst.logo %}
+                                <img src="{{ inst.logo.url }}" alt="{{ inst.name }}" class="w-10 h-10 rounded-xl object-cover border border-gray-200">
+                            {% endif %}
+                            <span class="font-semibold text-gray-900 text-sm">{{ inst.name }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'institution_tenders' inst.id %}" class="text-xs font-semibold text-emerald-600 hover:underline">View &rarr;</a>
+                            <form action="{% url 'toggle_favorite' 'institution' inst.id %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-xs text-red-500 hover:underline ml-2">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-8 text-center bg-gray-50 rounded-2xl border border-gray-100 text-sm text-gray-500">
+                No favorited institutions found matching your filters.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Favorited Vehicle Tenders Section -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-4">
+        <h2 class="text-lg font-bold text-gray-900 tracking-tight">Favorited Vehicle Tenders</h2>
+        
+        {% if fav_vehicles %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for tender in fav_vehicles %}
+                    <div class="bg-white rounded-2xl border border-gray-200/80 p-5 flex flex-col justify-between shadow-sm">
+                        {% if tender.image %}
+                            <img src="{{ tender.image.url }}" alt="{{ tender.title }}" class="w-full h-36 object-cover rounded-xl mb-3">
+                        {% endif %}
+                        <div class="space-y-2">
+                            <h3 class="font-bold text-gray-900 text-base">{{ tender.title }}</h3>
+                            <p class="text-xs text-gray-500">{{ tender.institution.name }}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center text-xs">
+                            <span class="text-gray-400">Make: {{ tender.make|default:"N/A" }}</span>
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'institution_tenders' tender.institution.id %}" class="font-semibold text-emerald-600 hover:underline">Details &rarr;</a>
+                                <form action="{% url 'toggle_favorite' 'vehicle' tender.id %}" method="POST" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm fw-bold w-100 py-2">
-                                        <i class="bi bi-trash"></i> Remove from Watchlist
-                                    </button>
+                                    <button type="submit" class="text-red-500 hover:underline ml-2">Remove</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-light text-center py-3 border shadow-sm">No favorited institutions found matching your filters.</div>
-                </div>
                 {% endfor %}
             </div>
-
-            <!-- Favorited Vehicles -->
-            <h4 class="fw-bold mb-3">Favorited Vehicle Tenders</h4>
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                {% for vehicle in fav_vehicles %}
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 d-flex flex-column justify-content-between">
-                        <div>
-                            {% if vehicle.image %}
-                                <img src="{{ vehicle.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;">
-                            {% else %}
-                                <div class="bg-dark text-white d-flex align-items-center justify-content-center" style="height: 180px;">
-                                    <span class="small text-uppercase">No Image Available</span>
-                                </div>
-                            {% endif %}
-
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-secondary">Year: {{ vehicle.model_year|default:"N/A" }}</span>
-                                    <span class="text-muted small"><i class="bi bi-geo-alt"></i> {{ vehicle.location|default:"N/A" }}</span>
-                                </div>
-
-                                <h5 class="fw-bold text-dark mb-1">{{ vehicle.title }}</h5>
-                                <p class="text-muted small mb-3">Institution: <strong>{{ vehicle.institution.name }}</strong></p>
-
-                                <div class="bg-light p-3 rounded mb-3">
-                                    <div class="small text-muted">Starting Price:</div>
-                                    <div class="fs-5 fw-bold text-dark">{{ vehicle.starting_price|floatformat:2 }} ETB</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-footer bg-white border-0 pt-0 pb-3">
-                            <form action="{% url 'toggle_favorite' 'vehicle' vehicle.pk %}" method="POST" class="mb-0">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-danger btn-sm fw-bold w-100 py-2">
-                                    <i class="bi bi-trash"></i> Remove from Watchlist
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-light text-center py-3 border shadow-sm">No favorited vehicle tenders found matching your filters.</div>
-                </div>
-                {% endfor %}
+        {% else %}
+            <div class="p-8 text-center bg-gray-50 rounded-2xl border border-gray-100 text-sm text-gray-500">
+                No favorited vehicle tenders found.
             </div>
-        </div>
+        {% endif %}
     </div>
+
 </div>
 {% endblock %}
