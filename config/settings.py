@@ -47,7 +47,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.subscription_status',  # Registered Context Processor
+                'accounts.context_processors.subscription_status',      # Subscription states
+                'accounts.context_processors.notification_processor',   # Global notification bell & unread counts
             ],
         },
     },

@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from .forms import CustomerRegistrationForm, ManualSubscriptionForm
 from .models import CustomerSubscription, Notification
@@ -79,3 +80,12 @@ def user_dashboard(request):
         'unread_count': unread_count,
     }
     return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+def mark_notifications_as_read(request):
+    """Marks all unread notifications as read when the user opens the bell dropdown."""
+    if request.method == 'POST':
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'invalid method'}, status=400)

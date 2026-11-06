@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <!-- Manual Subscription Submission Form (Bound to Django Form with CSRF) -->
+        <!-- Manual Subscription Submission Form -->
         <form method="POST" class="space-y-6 pt-4 border-t border-gray-100">
             {% csrf_token %}
 
@@ -107,39 +107,11 @@
         </form>
     </div>
 
-    <!-- In-App Notifications Section -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-900">Notifications</h2>
-            {% if unread_count > 0 %}
-                <span class="px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">
-                    {{ unread_count }} new
-                </span>
-            {% endif %}
-        </div>
-
-        <div class="space-y-3">
-            {% for notif in notifications %}
-                <div class="p-4 rounded-2xl border {% if notif.is_read %}border-gray-100 bg-gray-50/50 text-gray-600{% else %}border-emerald-200 bg-emerald-50/30 text-gray-900{% endif %} transition-all">
-                    <div class="flex justify-between items-start">
-                        <h3 class="font-semibold text-sm">{{ notif.title }}</h3>
-                        <span class="text-xs text-gray-400">{{ notif.created_at|date:"M d, Y" }}</span>
-                    </div>
-                    <p class="text-sm mt-1 leading-relaxed">{{ notif.message }}</p>
-                </div>
-            {% empty %}
-                <div class="text-center py-6">
-                    <p class="text-sm text-gray-400">No notifications yet.</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
     <!-- Subscription Status History Card -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
         <div>
             <h2 class="text-xl font-bold text-gray-900">Your Subscription Status History</h2>
-            <p class="text-sm text-gray-500 mt-1">Review your submitted payment and active subscription records.</p>
+            <p class="text-sm text-gray-500 mt-1">Review your submitted payment, active subscription records, and expiry countdowns.</p>
         </div>
 
         {% if subscriptions %}
@@ -152,12 +124,27 @@
                                 {% if sub.payment_method %}| Method: {{ sub.payment_method }}{% endif %} 
                                 {% if sub.sender_name %}| Sender: {{ sub.sender_name }}{% endif %}
                             </p>
+                            
+                            <!-- Dynamic Expiry Countdown & Warning -->
+                            {% if sub.status|lower == 'approved' %}
+                                <p class="text-xs font-medium {% if sub.days_remaining <= 5 %}text-rose-600 font-bold animate-pulse{% else %}text-gray-500{% endif %}">
+                                    {% if sub.is_expired %}
+                                        ⚠️ Subscription Expired
+                                    {% else %}
+                                        ⏳ Expires in: <span class="font-bold">{{ sub.days_remaining }} days</span> ({{ sub.get_expiry_date|date:"M d, Y" }})
+                                    {% endif %}
+                                </p>
+                            {% endif %}
                         </div>
 
                         <div>
-                            {% if sub.status|lower == 'approved' %}
+                            {% if sub.status|lower == 'approved' and not sub.is_expired %}
                                 <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 uppercase tracking-wider">
                                     Approved
+                                </span>
+                            {% elif sub.is_expired %}
+                                <span class="inline-block px-3 py-1 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg border border-rose-200 uppercase tracking-wider">
+                                    Expired
                                 </span>
                             {% elif sub.status|lower == 'pending' %}
                                 <span class="inline-block px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-200 uppercase tracking-wider">
