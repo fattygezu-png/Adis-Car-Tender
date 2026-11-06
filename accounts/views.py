@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
 from .forms import CustomerRegistrationForm, ManualSubscriptionForm
-from .models import CustomerSubscription
+from .models import CustomerSubscription, Notification
 
 User = get_user_model()
 
@@ -52,6 +52,10 @@ def user_dashboard(request):
     # Filter strictly by foreign key (user=request.user) to isolate records
     user_subscriptions = CustomerSubscription.objects.filter(user=request.user)
 
+    # Fetch user notifications and unread count
+    notifications = request.user.notifications.all()[:10]
+    unread_count = request.user.notifications.filter(is_read=False).count()
+
     if request.method == 'POST':
         form = ManualSubscriptionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -71,5 +75,7 @@ def user_dashboard(request):
     context = {
         'subscriptions': user_subscriptions,
         'form': form,
+        'notifications': notifications,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/dashboard.html', context)

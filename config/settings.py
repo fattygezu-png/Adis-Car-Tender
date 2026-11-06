@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'tenders',
+    'tenders.apps.TendersConfig',  # Change 'tenders' to this explicit path
 ]
 
 MIDDLEWARE = [

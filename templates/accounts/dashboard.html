@@ -107,6 +107,34 @@
         </form>
     </div>
 
+    <!-- In-App Notifications Section -->
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-900">Notifications</h2>
+            {% if unread_count > 0 %}
+                <span class="px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">
+                    {{ unread_count }} new
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="space-y-3">
+            {% for notif in notifications %}
+                <div class="p-4 rounded-2xl border {% if notif.is_read %}border-gray-100 bg-gray-50/50 text-gray-600{% else %}border-emerald-200 bg-emerald-50/30 text-gray-900{% endif %} transition-all">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-semibold text-sm">{{ notif.title }}</h3>
+                        <span class="text-xs text-gray-400">{{ notif.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <p class="text-sm mt-1 leading-relaxed">{{ notif.message }}</p>
+                </div>
+            {% empty %}
+                <div class="text-center py-6">
+                    <p class="text-sm text-gray-400">No notifications yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Subscription Status History Card -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-6">
         <div>
