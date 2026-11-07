@@ -4,6 +4,7 @@ from .models import (
     FavoriteVehicleTender,
     Institution,
     VehicleTender,
+    VehicleImage,
 )
 
 
@@ -22,8 +23,15 @@ class InstitutionAdmin(admin.ModelAdmin):
         obj.save()
 
 
+class VehicleImageInline(admin.TabularInline):
+    model = VehicleImage
+    extra = 3  # Gives 3 empty upload rows by default, admin can add up to 6
+    fields = ('image', 'caption')
+
+
 @admin.register(VehicleTender)
 class VehicleTenderAdmin(admin.ModelAdmin):
+    inlines = [VehicleImageInline]
     list_display = (
         'title',
         'institution',
@@ -34,7 +42,7 @@ class VehicleTenderAdmin(admin.ModelAdmin):
     )
     list_editable = ('is_announced', 'is_dismissed')
     list_filter = ('institution', 'is_announced', 'is_dismissed')
-    search_fields = ('title', 'make', 'winner_name')
+    search_fields = ('title', 'make', 'winner_name', 'plate_number')
 
     def save_model(self, request, obj, form, change):
         obj.save()

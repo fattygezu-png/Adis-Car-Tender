@@ -97,12 +97,40 @@
                 {% for tender in tenders %}
                     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
                         
-                        <!-- Safe Tender Image Check -->
-                        {% if tender.image %}
-                            <div class="h-48 w-full bg-gray-100 overflow-hidden">
-                                <img src="{{ tender.image.url }}" alt="{{ tender.title }}" class="w-full h-full object-cover">
+                        <!-- Multi-Image Carousel / Swipe Gallery -->
+                        <div class="relative h-48 w-full bg-gray-100 overflow-hidden group" id="carousel-{{ tender.id }}">
+                            <div class="flex transition-transform duration-300 ease-out h-full w-full carousel-track-{{ tender.id }}">
+                                {% if tender.images.all %}
+                                    {% for img in tender.images.all %}
+                                        <div class="w-full h-full flex-shrink-0 relative">
+                                            <img src="{{ img.image.url }}" alt="{{ tender.title }}" class="w-full h-full object-cover">
+                                            {% if img.caption %}
+                                                <span class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md backdrop-blur-sm">
+                                                    {{ img.caption }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs font-medium">
+                                        No Image Available
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
+
+                            <!-- Carousel Controls (Show if more than 1 image) -->
+                            {% if tender.images.count > 1 %}
+                                <button onclick="slideCarousel('{{ tender.id }}', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                </button>
+                                <button onclick="slideCarousel('{{ tender.id }}', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                                <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md backdrop-blur-sm pointer-events-none">
+                                    Swipe / Click
+                                </div>
+                            {% endif %}
+                        </div>
 
                         <div class="p-6 space-y-3 flex-1">
                             <h3 class="text-lg font-bold text-gray-900">{{ tender.title }}</h3>
@@ -152,4 +180,29 @@
     </div>
 
 </div>
+
+<!-- Carousel Script for Swipe / Click Cycling -->
+<script>
+    const carouselStates = {};
+
+    function slideCarousel(tenderId, direction) {
+        const track = document.querySelector(`.carousel-track-${tenderId}`);
+        if (!track) return;
+        const totalImages = track.children.length;
+        
+        if (!carouselStates[tenderId]) {
+            carouselStates[tenderId] = 0;
+        }
+
+        carouselStates[tenderId] += direction;
+
+        if (carouselStates[tenderId] < 0) {
+            carouselStates[tenderId] = totalImages - 1;
+        } else if (carouselStates[tenderId] >= totalImages) {
+            carouselStates[tenderId] = 0;
+        }
+
+        track.style.transform = `translateX(-${carouselStates[tenderId] * 100}%)`;
+    }
+</script>
 {% endblock %}

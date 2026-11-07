@@ -53,10 +53,6 @@ class VehicleTender(models.Model):
         help_text='Enter plate number (accepts letters and numbers)',
     )
 
-    image = models.ImageField(
-        upload_to='tender_cars/', blank=True, null=True, help_text='Car picture'
-    )
-
     winning_price = models.DecimalField(
         max_digits=12, decimal_places=2, blank=True, null=True
     )
@@ -76,6 +72,23 @@ class VehicleTender(models.Model):
 
     def __str__(self):
         return f'{self.title} - {self.institution.name}'
+
+
+class VehicleImage(models.Model):
+    vehicle = models.ForeignKey(
+        VehicleTender, on_delete=models.CASCADE, related_name='images'
+    )
+    image = models.ImageField(
+        upload_to='tender_car_gallery/',
+        help_text='Upload up to 6 vehicle images (front, back, side, interior, motor, etc.)',
+    )
+    caption = models.CharField(
+        max_length=100, blank=True, null=True, help_text='e.g., Front View, Interior, Motor'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Image for {self.vehicle.title}'
 
 
 class FavoriteInstitution(models.Model):
