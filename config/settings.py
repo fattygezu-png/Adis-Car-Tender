@@ -12,10 +12,11 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com,127.0.0.1,localhost').split(',')
 
-# Fix CSRF 403 Forbidden issues on local development
+# Fix CSRF 403 Forbidden issues on local and production
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'http://localhost:8000',
+    'https://adis-car-tender.onrender.com',
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
