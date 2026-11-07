@@ -7,4 +7,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.user_dashboard, name='user_dashboard'),
     path('dashboard/', views.user_dashboard, name='dashboard'), # Alias for base.html template compatibility
+    path('notifications/mark-read/', views.mark_notifications_as_read, name='mark_notifications_as_read'),
 ]

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ institution.name }} - Vehicle Tenders{% endblock %}
+{% block title %}{{ institution.name }} Vehicle Tenders{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -111,7 +111,9 @@
                                 <div><span class="font-semibold text-gray-900">Make:</span> {{ tender.make|default:"N/A" }}</div>
                                 <div><span class="font-semibold text-gray-900">Body:</span> {{ tender.body_type|default:"N/A" }}</div>
                                 <div><span class="font-semibold text-gray-900">Location:</span> {{ tender.location|default:"N/A" }}</div>
-                                <div><span class="font-semibold text-gray-900">Year:</span> {{ tender.year|default:"N/A" }}</div>
+                                <div><span class="font-semibold text-gray-900">Year:</span> {{ tender.model_year|default:"N/A" }}</div>
+                                <div class="col-span-2 pt-1"><span class="font-semibold text-gray-900">Plate Number:</span> <span class="text-emerald-700 font-bold">{{ tender.plate_number|default:"N/A" }}</span></div>
+                                <div class="col-span-2"><span class="font-semibold text-gray-900">Starting Price:</span> <span class="text-emerald-700 font-bold">{{ tender.starting_price|default:"N/A" }} ETB</span></div>
                             </div>
                         </div>
 

@@ -10,6 +10,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
+# Fix CSRF 403 Forbidden issues on local development
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
+
+# Secure Cookie & Session configurations for development
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+
 
 # Application definition
 
@@ -21,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'tenders.apps.TendersConfig',  # Change 'tenders' to this explicit path
+    'tenders.apps.TendersConfig',  # Explicit path
 ]
 
 MIDDLEWARE = [

@@ -1,5 +1,5 @@
 from django.db.models import Q
-from .models import CustomerSubscription
+from .models import CustomerSubscription, Notification
 
 
 def subscription_status(request):
@@ -41,4 +41,19 @@ def subscription_status(request):
         'is_rejected_user': False,
         'is_pending_user': False,
         'latest_subscription': None,
+    }
+
+
+def notification_processor(request):
+    """Passes user notifications and unread count to all templates globally."""
+    if request.user.is_authenticated:
+        notifications = Notification.objects.filter(user=request.user)
+        unread_count = notifications.filter(is_read=False).count()
+        return {
+            'global_notifications': notifications,
+            'global_unread_count': unread_count,
+        }
+    return {
+        'global_notifications': [],
+        'global_unread_count': 0,
     }

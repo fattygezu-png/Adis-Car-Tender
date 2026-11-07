@@ -1,5 +1,7 @@
+from datetime import timedelta
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -40,8 +42,34 @@ class CustomerSubscription(models.Model):
     status = models.CharField(max_length=20, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_expiry_date(self):
+        if self.created_at:
+            if 'Monthly' in self.plan_name:
+                days = 30
+            elif 'Quarterly' in self.plan_name:
+                days = 90
+            elif 'Semiannually' in self.plan_name or 'Semi-Annually' in self.plan_name:
+                days = 180
+            else:
+                days = 30
+            return self.created_at + timedelta(days=days)
+        return None
+
+    def days_remaining(self):
+        expiry = self.get_expiry_date()
+        if expiry:
+            delta = expiry - timezone.now()
+            return max(0, delta.days)
+        return 0
+
+    def is_expired(self):
+        expiry = self.get_expiry_date()
+        if expiry:
+            return timezone.now() > expiry
+        return False
+
     def is_active(self):
-        return str(self.status).upper() == 'APPROVED'
+        return str(self.status).upper() == 'APPROVED' and not self.is_expired()
 
     def __str__(self):
         return f'{self.sender_name} ({self.user}) - {self.plan_name} via {self.payment_method} [{self.status}]'
@@ -63,3 +91,10 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.title}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Automatically prune older notifications, keeping only the latest 20 per user
+        excess_notifications = Notification.objects.filter(user=self.user).order_by('-created_at')[20:]
+        if excess_notifications.exists():
+            Notification.objects.filter(id__in=excess_notifications.values('id')).delete()

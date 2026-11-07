@@ -46,6 +46,12 @@ class VehicleTender(models.Model):
     starting_price = models.DecimalField(
         max_digits=12, decimal_places=2, default=0.00
     )
+    plate_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text='Enter plate number (accepts letters and numbers)',
+    )
 
     image = models.ImageField(
         upload_to='tender_cars/', blank=True, null=True, help_text='Car picture'
