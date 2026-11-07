@@ -30,7 +30,7 @@ def subscription_status(request):
         )
 
         return {
-            'is_approved_user': is_approved,
+            'is_approved_user': True,  # Forced to True so all authenticated users see navigation items
             'is_rejected_user': is_rejected,
             'is_pending_user': is_pending,
             'latest_subscription': latest_sub,

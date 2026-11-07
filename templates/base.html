@@ -28,11 +28,9 @@
                 <!-- Nav Links -->
                 <div class="hidden md:flex items-center space-x-6">
                     {% if user.is_authenticated %}
-                        {% if is_approved_user %}
-                            <a href="{% url 'tender_list' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Tenders</a>
-                            <a href="{% url 'watchlist' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Watchlist</a>
-                            <a href="{% url 'winners_archive' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Winners Archive</a>
-                        {% endif %}
+                        <a href="{% url 'tender_list' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Tenders</a>
+                        <a href="{% url 'watchlist' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Watchlist</a>
+                        <a href="{% url 'winners_archive' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Winners Archive</a>
                         <a href="{% url 'user_dashboard' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Dashboard</a>
                         
                         <!-- Notification Bell Dropdown -->
@@ -61,7 +59,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
                                 
-                                <!-- Red Dot / Unread Indicator Badge (Controlled by Alpine state) -->
+                                <!-- Red Dot / Unread Indicator Badge -->
                                 <span x-show="unreadCount > 0" class="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#111827] animate-pulse" style="display: none;"></span>
                             </button>
 
