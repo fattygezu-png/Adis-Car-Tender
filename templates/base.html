@@ -25,14 +25,15 @@
                     </a>
                 </div>
 
-                <!-- Nav Links (Always visible) -->
+                <!-- Right Side Action Area -->
                 <div class="flex items-center space-x-6">
-                    <a href="{% url 'tender_list' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Tenders</a>
-                    <a href="{% url 'watchlist' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Watchlist</a>
-                    <a href="{% url 'winners_archive' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Winners Archive</a>
-                    <a href="{% url 'user_dashboard' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Dashboard</a>
-                    
                     {% if user.is_authenticated %}
+                        <!-- Authenticated Navigation Links -->
+                        <a href="{% url 'tender_list' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Tenders</a>
+                        <a href="{% url 'watchlist' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Watchlist</a>
+                        <a href="{% url 'winners_archive' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Winners Archive</a>
+                        <a href="{% url 'user_dashboard' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                        
                         <!-- Notification Bell Dropdown -->
                         <div class="relative" x-data="{ 
                             open: false, 
@@ -92,6 +93,7 @@
                             Sign Out
                         </a>
                     {% else %}
+                        <!-- Unauthenticated State (Clean Header on Login/Register Pages) -->
                         <a href="{% url 'login' %}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Login</a>
                         <a href="{% url 'register' %}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-all shadow-sm">Register</a>
                     {% endif %}
