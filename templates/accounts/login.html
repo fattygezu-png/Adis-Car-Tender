@@ -16,6 +16,17 @@
             </p>
         </div>
 
+        <!-- Django Messages Alert Box -->
+        {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                    <div class="p-3 rounded-xl text-sm font-medium {% if message.tags == 'error' or message.tags == 'danger' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-emerald-50 border border-emerald-200 text-emerald-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <!-- Login Form -->
         <form method="POST" class="space-y-4">
             {% csrf_token %}
