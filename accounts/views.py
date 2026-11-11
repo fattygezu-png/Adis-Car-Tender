@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from .forms import CustomerRegistrationForm, ManualSubscriptionForm
@@ -34,22 +33,25 @@ def login_view(request):
         return redirect('user_dashboard')
 
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
-            
-            # Check if user is staff or superuser, and redirect accordingly
-            if user.is_staff or user.is_superuser:
-                return redirect('/admin/')
-            else:
+        username_input = request.POST.get('username')
+        password_input = request.POST.get('password')
+
+        # Authenticate directly against database credentials
+        user = authenticate(request, username=username_input, password=password_input)
+
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}!')
+                if user.is_staff or user.is_superuser:
+                    return redirect('/admin/')
                 return redirect('user_dashboard')
+            else:
+                messages.error(request, 'This account is currently inactive.')
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'accounts/login.html', {'form': form})
+
+    return render(request, 'accounts/login.html')
 
 
 @login_required
