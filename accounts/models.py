@@ -8,7 +8,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
-        return self.username
+        return self.username or self.email or f"User-{self.pk}"
 
 
 class CustomerSubscription(models.Model):
@@ -72,7 +72,8 @@ class CustomerSubscription(models.Model):
         return str(self.status).upper() == 'APPROVED' and not self.is_expired()
 
     def __str__(self):
-        return f'{self.sender_name} ({self.user}) - {self.plan_name} via {self.payment_method} [{self.status}]'
+        user_display = self.user.username if self.user else "Anonymous"
+        return f'{self.sender_name} ({user_display}) - {self.plan_name} via {self.payment_method} [{self.status}]'
 
 
 class Notification(models.Model):
@@ -95,6 +96,10 @@ class Notification(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Automatically prune older notifications, keeping only the latest 20 per user
-        excess_notifications = Notification.objects.filter(user=self.user).order_by('-created_at')[20:]
-        if excess_notifications.exists():
-            Notification.objects.filter(id__in=excess_notifications.values('id')).delete()
+        excess_ids = list(
+            Notification.objects.filter(user=self.user)
+            .order_by('-created_at')
+            .values_list('id', flat=True)[20:]
+        )
+        if excess_ids:
+            Notification.objects.filter(id__in=excess_ids).delete()

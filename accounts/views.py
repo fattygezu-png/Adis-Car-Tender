@@ -14,16 +14,25 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomerRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.is_active = True  # Ensure new users are active immediately
+            user.save()
             login(request, user)
-            messages.success(request, 'Registration successful!')
+            messages.success(request, 'Registration successful! Welcome to Adis Car Tender.')
             return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = CustomerRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('/admin/')
+        return redirect('user_dashboard')
+
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -36,6 +45,8 @@ def login_view(request):
                 return redirect('/admin/')
             else:
                 return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Invalid username or password. Please try again.')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -70,6 +81,8 @@ def user_dashboard(request):
                 'Subscription request submitted successfully! Waiting for admin approval.',
             )
             return redirect('user_dashboard')
+        else:
+            messages.error(request, 'Please check your submission details.')
     else:
         form = ManualSubscriptionForm()
 
