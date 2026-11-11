@@ -5,12 +5,15 @@ from .models import CustomerSubscription, Notification
 def subscription_status(request):
     """Passes detailed subscription and approval state to templates."""
     if request.user.is_authenticated:
-        # Check if user has an explicitly APPROVED subscription
-        is_approved = CustomerSubscription.objects.filter(
-            Q(user=request.user)
-            | Q(sender_name__iexact=request.user.username.strip()),
-            status__iexact='APPROVED',
-        ).exists()
+        # Check if user is staff/superuser or has an explicitly APPROVED subscription
+        if request.user.is_staff or request.user.is_superuser:
+            is_approved = True
+        else:
+            is_approved = CustomerSubscription.objects.filter(
+                Q(user=request.user)
+                | Q(sender_name__iexact=request.user.username.strip()),
+                status__iexact='APPROVED',
+            ).exists()
 
         # Check latest subscription status
         latest_sub = (
@@ -30,7 +33,7 @@ def subscription_status(request):
         )
 
         return {
-            'is_approved_user': True,  # Forced to True so all authenticated users see navigation items
+            'is_approved_user': is_approved,  # Fixed to rely on actual approval check
             'is_rejected_user': is_rejected,
             'is_pending_user': is_pending,
             'latest_subscription': latest_sub,
