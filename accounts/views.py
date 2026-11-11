@@ -25,7 +25,6 @@ def register_view(request):
         form = CustomerRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
-
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_staff or request.user.is_superuser:
@@ -34,13 +33,16 @@ def login_view(request):
 
     username_input = ""
     if request.method == 'POST':
-        username_input = request.POST.get('username', '')
+        username_input = request.POST.get('username', '').strip()
         password_input = request.POST.get('password', '')
+
+        print(f"DEBUG LOGIN ATTEMPT: username='{username_input}'")
 
         # Authenticate directly against database credentials
         user = authenticate(request, username=username_input, password=password_input)
 
         if user is not None:
+            print(f"DEBUG LOGIN SUCCESS: User found for '{username_input}', is_active={user.is_active}")
             if user.is_active:
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.username}!')
@@ -50,10 +52,10 @@ def login_view(request):
             else:
                 messages.error(request, 'This account is currently inactive.')
         else:
+            print(f"DEBUG LOGIN FAILED: authenticate() returned None for '{username_input}'")
             messages.error(request, 'Invalid username or password. Please try again.')
 
     return render(request, 'accounts/login.html', {'username_input': username_input})
-
 
 @login_required
 def logout_view(request):
