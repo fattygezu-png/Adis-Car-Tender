@@ -32,9 +32,10 @@ def login_view(request):
             return redirect('/admin/')
         return redirect('user_dashboard')
 
+    username_input = ""
     if request.method == 'POST':
-        username_input = request.POST.get('username')
-        password_input = request.POST.get('password')
+        username_input = request.POST.get('username', '')
+        password_input = request.POST.get('password', '')
 
         # Authenticate directly against database credentials
         user = authenticate(request, username=username_input, password=password_input)
@@ -51,7 +52,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
 
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'username_input': username_input})
 
 
 @login_required
